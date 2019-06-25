@@ -1,0 +1,167 @@
+{% extends "index.html" %}
+
+{% block content %}
+    <style>
+    .navbar-brand {font-size: xx-large; }
+    .v-divider { border-right: 1px solid #343a40!important;
+                 border-left: 1px solid #343a40!important;
+                 margin: 1px;}
+    </style>
+
+    <script>
+
+    function editCard(id, content, state) {
+
+    }
+
+    </script>
+
+    <nav class="navbar navbar-expand-md bg-dark navbar-dark fixed-top">
+        <span class="navbar-brand">Agile Board</span>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-toggle="modal" data-target="#newCardModal">New Card</a>
+            </li>
+            {% if user.is_superuser %}
+            <li class="nav-item">
+              <a class="nav-link" href="/admin">Admin</a>
+            </li>
+            {% endif %}
+            <li class="nav-item">
+              <a class="nav-link" href="/auth/logout">Logout</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container-fluid" style="margin-top:80px">
+        {% block cards %}
+        <div class="row">
+            <div class="col v-divider" style="width: 33%">
+                <h3>TO DO</h3>
+                <div class="card-columns">
+                {% for card in todo %}
+                    <div class="card bg-warning">
+
+                        <div class="card-body">
+                            {{ card.content }}
+                        </div>
+                        <div class="card-footer">
+                            <p style="font-size: x-small;">{{ card.modified_at|date:"d:m:Y H:i:s" }}</p>
+                            <a href="/edit/{{ card.id }}" class="card-link"">Edit</a>
+                            <a href="/delete/{{ card.id }}" class="card-link">Delete</a>
+                            <div class="d-flex flex-row justify-content-center">
+                                <div class="p-2">
+                                    <a href="/update/{{ card.id }}/IN_PROGRESS" class="card-link" data-toggle="tooltip" title="Move to In Progress">
+                                        <b>>>></b>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+
+            <div class="col v-divider" style="width: 33%">
+                <h3>In Progress</h3>
+                <div class="card-columns">
+                {% for card in in_progress %}
+                    <div class="card bg-light">
+
+                        <div class="card-body">
+                            {{ card.content }}
+                        </div>
+                        <div class="card-footer">
+                            <p style="font-size: x-small;">
+                                {{ card.modified_at|date:"d:m:Y H:i:s" }}
+                            </p>
+                            <a href="/edit/{{ card.id }}" class="card-link"">Edit</a>
+                            <a href="/delete/{{ card.id }}" class="card-link">Delete</a>
+                            <div class="d-flex flex-row justify-content-center">
+                                <div class="p-2">
+                                    <a href="/update/{{ card.id }}/TODO" class="card-link" data-toggle="tooltip" title="Move to TODO">
+                                        <b><<<</b>
+                                    </a>
+                                </div>
+                                <div class="p-2">
+
+                                </div>
+                                <div class="p-2">
+                                    <a href="/update/{{ card.id }}/DONE" class="card-link" data-toggle="tooltip" title="Move to Done">
+                                        <b>>>></b>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+
+            <div class="col v-divider" style="width: 33%">
+                <h3>Done</h3>
+                <div class="card-columns">
+                {% for card in done %}
+                    <div class="card bg-success">
+
+                        <div class="card-body">
+                            {{ card.content }}
+                        </div>
+                        <div class="card-footer">
+                            <p style="font-size: x-small;">{{ card.modified_at|date:"d:m:Y H:i:s" }}</p>
+                            <a href="/edit/{{ card.id }}" class="card-link"">Edit</a>
+                            <a href="/delete/{{ card.id }}" class="card-link">Delete</a>
+                            <div class="d-flex flex-row justify-content-center">
+                                <div class="p-2">
+                                    <a href="/update/{{ card.id }}/IN_PROGRESS" class="card-link" data-toggle="tooltip" title="Move to In Progress">
+                                        <b><<<</b>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+    <!-- New Card -->
+    <div class="modal fade" id="newCardModal">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+
+            <div class="modal-header">
+              <h4 class="modal-title">New Agile Card</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+                <form method="post" action="/" class="form-12" id="cardForm">
+                {% csrf_token %}
+                    <div class="form-group">
+                        <label for="{{ new_card.content.id_for_label }}">Content:</label>
+                        <textarea class="form-control" id="{{ new_card.content.id_for_label }}" name="{{ new_card.content.html_name }}" rows="5" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ new_card.state.id_for_label }}">State:</label>
+                        <select name="{{ new_card.state.html_name }}" class="form-control" id="{{ new_card.state.id_for_label }}" required">
+                            {% for id, name in new_card.state.field.choices|slice:"1:" %}
+                                <option value="{{ id }}">{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-info" value="Create" />
+                        <input type="hidden" name="next" value="/" />
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{%  endblock %}

@@ -1,0 +1,35 @@
+{% extends "cards.html" %}
+
+{% block cards %}
+    <div class="container" style="width: 500px">
+        <div class="card bg-light" style="width: 500px;">
+            <div class="card-header">
+                <h2>Edit Agile Card</h2>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/edit/{{ card.id }}" class="form-12" id="cardEditForm">
+                {% csrf_token %}
+                    <div class="form-group">
+                        <label for="content">Content:</label>
+                        <textarea class="form-control" id="edit_area" name="content" rows="5" required>{{ card.content }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="state">State:</label>
+                        <select name="state" class="form-control" id="edit_state" required">
+                            {% for id, name in card.POSSIBLE_STATES %}
+                                <option value="{{ id }}"
+                                {% if id == card.state %} selected {% endif %}
+                                >{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" class="btn btn-info" value="Update" />
+                        <input type="hidden" name="next" value="/" />
+                        <button type="button" class="btn btn-secondary" onclick="location.href='/'">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
